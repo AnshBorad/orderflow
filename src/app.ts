@@ -3,10 +3,12 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import pinoHttp from 'pino-http';
-import { prisma } from "./shared/prisma";
-import { redis } from "./shared/redis";
-import { logger } from "./shared/logger";
+import { pinoHttp } from 'pino-http';
+import { prisma } from "./shared/prisma.js";
+import { redis } from "./shared/redis.js";
+import { logger } from "./shared/logger.js";
+import { authRouter } from './modules/auth/router.js';
+import { errorHandler } from './shared/errorHandler.js';
 
 dotenv.config();
 
@@ -33,4 +35,7 @@ app.get('/ready', async (_req, res) => {
         res.status(503).json({ status: 'degraded' });
     }
 });
+
+app.use("/api/v1/auth", authRouter);
+app.use(errorHandler)
 export default app;

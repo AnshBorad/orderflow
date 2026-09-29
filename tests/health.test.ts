@@ -1,0 +1,17 @@
+import request from 'supertest';
+import app from '../src/app.js';
+
+describe('GET /health', () => {
+    it('returns ok', async () => {
+        const res = await request(app).get('/health');
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe('ok');
+    });
+});
+describe('GET /ready', () => {
+    it('returns ok', async () => {
+        const res = await request(app).get('/ready');
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe('ready');
+    });
+});

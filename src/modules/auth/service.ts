@@ -42,7 +42,7 @@ const signInService = async (input: LoginInput) => {
         createdAt: user.createdAt,
     };
 
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens (userWithoutPassword);
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(userWithoutPassword);
     return {
         user: userWithoutPassword,
         accessToken: accessToken,
@@ -65,7 +65,7 @@ const resetPasswordService = async () => {
 
 }
 
-const generateAccessAndRefreshTokens  = async (user: { id: any; email: any; name: any; role: any; }) => {
+const generateAccessAndRefreshTokens = async (user: { id: string; email: string; name: string; role: string; }) => {
     if (!process.env.JWT_ACCESS_SECRET || !process.env.REFRESH_TOKEN_EXPIRY || !process.env.JWT_REFRESH_SECRET || !process.env.REFRESH_TOKEN_EXPIRY) {
         throw new ApiError(500, "Internal server error");
     }
@@ -105,7 +105,14 @@ const generateAccessAndRefreshTokens  = async (user: { id: any; email: any; name
 }
 
 
-const getAllUsersService = async () => {
+const getAllUsersService = async (user: { id: string; email: string; name: string; role: string; }) => {
+    if (user.role == "CUSTOMER") {
+        throw new ApiError(403, "Unauthorized");
+    }
+    const users = await prisma.user.findMany({
+        select: { id: true, name: true, email: true, role: true, createdAt: true },
+    });
+    return users;
 
 
 }

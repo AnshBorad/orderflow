@@ -5,6 +5,7 @@ import { ApiError } from "../../utils/ApiError.js";
 import type { SignUpInput, LoginInput } from "./schema.js";
 import jwt from "jsonwebtoken";
 import { config } from "../../shared/config.js";
+import { redis } from "../../shared/redis.js";
 
 const signUpService = async (input: SignUpInput) => {
     const { name, email, password } = input;
@@ -50,9 +51,19 @@ const signInService = async (input: LoginInput) => {
     };
 }
 
-const signOutService = async () => {
+const signOutService = async (refreshToken: string) => {
 
-
+    try {
+        const decodedRefreshToken = jwt.verify(refreshToken, config.JWT_REFRESH_SECRET) as jwt.JwtPayload;
+        
+        const remainingSeconds = decodedRefreshToken.exp! - Math.floor(Date.now() / 1000);
+        if (remainingSeconds > 0) {
+            await redis.set(`blacklist:${refreshToken}`,"1", "EX", remainingSeconds);
+        }
+        return;
+    } catch (error) {
+        throw new ApiError(401,"Invalid token");
+    }
 }
 
 const forgotPasswordService = async () => {

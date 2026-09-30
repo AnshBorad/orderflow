@@ -1,10 +1,15 @@
 import { Request, Response, NextFunction } from "express";
-import { signInService, signUpService, getAllUsersService } from "./service.js";
+import { signInService, signUpService, getAllUsersService, signOutService } from "./service.js";
 import { loginSchema, signUpSchema } from "./schema.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import { prisma } from "../../shared/prisma.js";
 import { ApiError } from "../../utils/ApiError.js";
+
+const options = {
+    httpOnly: true,
+    secure: true,
+};
 
 const signUpController = asyncHandler(async (req, res) => {
 
@@ -20,10 +25,7 @@ const signInController = asyncHandler(async (req, res) => {
     const input = loginSchema.parse(req.body);
     const user = await signInService(input);
 
-    const options = {
-        httpOnly: true,
-        secure: true,
-    };
+
 
     return res
         .cookie("refreshToken", user.refreshToken, options)
@@ -33,6 +35,17 @@ const signInController = asyncHandler(async (req, res) => {
             new ApiResponse(200, user, "User signed in successfully")
         );
 })
+
+const signOutController = asyncHandler(async (req, res) => {
+    const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+    if (!refreshToken) throw new ApiError(400, "Refresh token is required");
+    await signOutService(refreshToken);
+    return res
+        .clearCookie("refreshToken", options)
+        .clearCookie("accessToken", options)
+        .status(200)
+        .json(new ApiResponse(200, null, "User signed out successfully"));
+});
 
 const meController = asyncHandler(async (req, res) => {
     const user = await prisma.user.findUnique({
@@ -49,4 +62,4 @@ const getAllUsersController = asyncHandler(async (req, res) => {
     res.status(200).json(new ApiResponse(200, users, "Users fetched successfully"));
 });
 
-export { signUpController, signInController, meController, getAllUsersController };
+export { signUpController, signInController, signOutController, meController, getAllUsersController };

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { signInService, signUpService, getAllUsersService, signOutService } from "./service.js";
-import { loginSchema, signUpSchema } from "./schema.js";
+import { loginSchema, signUpSchema } from "./schemas.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import { prisma } from "../../shared/prisma.js";

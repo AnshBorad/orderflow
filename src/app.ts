@@ -9,6 +9,7 @@ import { redis } from "./shared/redis.js";
 import { logger } from "./shared/logger.js";
 import { authRouter } from './modules/auth/router.js';
 import { errorHandler } from './shared/errorHandler.js';
+import { productRouter } from './modules/products/router.js';
 
 dotenv.config();
 
@@ -37,5 +38,6 @@ app.get('/ready', async (_req, res) => {
 });
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/products", productRouter);
 app.use(errorHandler)
 export default app;

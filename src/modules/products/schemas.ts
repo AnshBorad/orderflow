@@ -24,26 +24,14 @@ const getAllProductsSchema = z.object({
     category: z.string().optional(),
     brand: z.string().optional(),
     sortOrder: z.enum(["asc", "desc"]).optional(),
-    page: z.number().int().positive("Page must be positive").optional(),
-    limit: z.number().int().max(50).positive("Limit must be positive").optional(),
+    page: z.coerce.number().int().positive().optional(),
+    limit: z.coerce.number().int().max(50).positive().optional(),
 })
 
 const getSingleProductSchema = z.object({
     id: z.string().min(1, "Product ID is required"),
 })
 
-const createProductReviewSchema = z.object({
-    productId: z.string().min(1, "Product ID is required"),
-    rating: z.number().positive("Rating must be positive"),
-    comment: z.string().min(10, "Comment must be at least 10 characters"),
-})
-
-const updateProductReviewSchema = z.object({
-    productId: z.string().min(1, "Product ID is required"),
-    rating: z.number().positive("Rating must be positive"),
-    comment: z.string().min(10, "Comment must be at least 10 characters"),
-})
 
 
-
-export { createProductSchema, updateProductSchema, getAllProductsSchema, getSingleProductSchema, createProductReviewSchema, updateProductReviewSchema, productIdSchema };
+export { createProductSchema, updateProductSchema, getAllProductsSchema, getSingleProductSchema, productIdSchema };

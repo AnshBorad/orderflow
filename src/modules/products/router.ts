@@ -6,7 +6,7 @@ const productRouter = Router();
 
 productRouter.get("/", getAllProductsController);
 productRouter.get("/:id", getProductByIDController);
-productRouter.post("/", verifyAccessToken );
+// productRouter.post("/", verifyAccessToken );
 
 
 export { productRouter };

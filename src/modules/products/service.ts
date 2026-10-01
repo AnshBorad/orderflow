@@ -1,8 +1,7 @@
 import { prisma } from "../../shared/prisma.js";
 import { ApiError } from "../../utils/ApiError.js";
-import { logger } from "../../shared/logger.js";
 import type { z } from "zod";
-import type { productIdSchema, getAllProductsSchema } from "./schemas.js";
+import type { getAllProductsSchema } from "./schemas.js";
 
 
 type GetAllInput = z.infer<typeof getAllProductsSchema>;
@@ -11,10 +10,12 @@ const getAllProductsService = async (input: GetAllInput) => {
     const page = input.page ?? 1;
     const limit = input.limit ?? 10;
     const skip = (page - 1) * limit;
-
+    const where = input.search
+        ? { name: { contains: input.search, mode: "insensitive" as const } }
+        : {};
     const [products, total] = await prisma.$transaction([
         prisma.product.findMany({
-            where: input.search ? { name: { contains: input.search, mode: "insensitive" } } : {},
+            where,
 
             orderBy: {
                 createdAt: "desc",
@@ -23,7 +24,7 @@ const getAllProductsService = async (input: GetAllInput) => {
             take: limit,
             select: { id: true, name: true, description: true, priceCents: true, stock: true }
         }),
-        prisma.product.count({ where: input.search ? { name: { contains: input.search, mode: "insensitive" } } : {} })
+        prisma.product.count({ where })
     ])
 
     return {
@@ -32,7 +33,7 @@ const getAllProductsService = async (input: GetAllInput) => {
     };
 }
 
-const getProductByIDService = async (id: string) => {
+const getProductByIdService  = async (id: string) => {
     const product = await prisma.product.findUnique(
         {
             where: { id },
@@ -42,4 +43,4 @@ const getProductByIDService = async (id: string) => {
     return product;
 }
 
-export { getAllProductsService, getProductByIDService };
+export { getAllProductsService, getProductByIdService  };

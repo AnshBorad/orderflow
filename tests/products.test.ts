@@ -45,7 +45,7 @@ describe("Products", () => {
     });
     it("should not get product by invalid id", async () => {
         const res = await request(app).get("/api/v1/products/invalid");
-        expect(res.statusCode).toBe(400);
+        expect(res.statusCode).toBe(404);
     });
     it("should create product", async () => {
         const res = await request(app).post("/api/v1/products").send({
@@ -65,7 +65,7 @@ describe("Products", () => {
         });
         expect(res.statusCode).toBe(401);
     });
-    it("should not create product with invalid access token", async () => {
+    it("should not create product as customer (RBAC)", async () => {
         const res = await request(app).post("/api/v1/products").send({
             name: "Product 1",
             priceCents: 100,

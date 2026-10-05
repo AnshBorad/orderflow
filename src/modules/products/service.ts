@@ -1,10 +1,11 @@
 import { prisma } from "../../shared/prisma.js";
 import { ApiError } from "../../utils/ApiError.js";
 import type { z } from "zod";
-import type { getAllProductsSchema } from "./schemas.js";
+import type { getAllProductsSchema, createProductSchema } from "./schemas.js";
 
 
 type GetAllInput = z.infer<typeof getAllProductsSchema>;
+type CreateProductInput = z.infer<typeof createProductSchema>;
 
 const getAllProductsService = async (input: GetAllInput) => {
     const page = input.page ?? 1;
@@ -33,7 +34,7 @@ const getAllProductsService = async (input: GetAllInput) => {
     };
 }
 
-const getProductByIdService  = async (id: string) => {
+const getProductByIdService = async (id: string) => {
     const product = await prisma.product.findUnique(
         {
             where: { id },
@@ -43,4 +44,9 @@ const getProductByIdService  = async (id: string) => {
     return product;
 }
 
-export { getAllProductsService, getProductByIdService  };
+const createProductService = async (input: CreateProductInput) => {
+    const product = await prisma.product.create({ data: input });
+    return product;
+}
+
+export { getAllProductsService, getProductByIdService, createProductService };

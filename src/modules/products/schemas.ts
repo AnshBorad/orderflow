@@ -13,7 +13,7 @@ const updateProductSchema = z.object({
     description: z.string().min(10, "Description must be at least 10 characters"),
     stock: z.number().int().min(0, "Stock cannot be negative"),
 })
-const productIdSchema = z.object({ id: z.string().min(1, "Invalid product id") });
+const productIdSchema = z.object({ id: z.string().cuid() });
 
 
 

@@ -6,18 +6,29 @@ import { redis } from "../src/shared/redis.js";
 describe("Products", () => {
 
     let accessToken: string;
-    let refreshToken: string;
-
+    let customerAccessToken: string;
+    let productId: string[] = [];
+    const createProduct = {
+        name: "Product 1",
+        priceCents: 100,
+        description: "Product 1 description",
+        stock: 10,
+    }
 
 
     beforeAll(async () => {
         const login = await request(app).post("/api/v1/auth/login")
             .send({ email: "admin@orderflow.dev", password: "Password123!" });
         accessToken = login.body.data.accessToken;
-        refreshToken = login.body.data.refreshToken;
+        const customerLogin = await request(app).post("/api/v1/auth/login")
+            .send({ email: "customer@orderflow.dev", password: "Password123!" });
+        customerAccessToken = customerLogin.body.data.accessToken;
         await prisma.$connect();
     });
     afterAll(async () => {
+        if (productId.length > 0) {
+            await prisma.product.deleteMany({ where: { id: { in: productId } } }).catch(() => { });
+        }
         await prisma.$disconnect();
         await redis.quit();
     });
@@ -26,8 +37,11 @@ describe("Products", () => {
         expect(res.statusCode).toBe(200);
     });
     it("should get product by id", async () => {
-        const res = await request(app).get("/api/v1/products/cmuuprs1m0000uj4kvhd7lhjs");
-        expect(res.statusCode).toBe(200);
+        const res = await request(app).post("/api/v1/products").send(createProduct).set("Authorization", `Bearer ${accessToken}`);
+        productId.push(res.body.data.id);
+        const id = res.body.data.id;
+        const res2 = await request(app).get(`/api/v1/products/${id}`);
+        expect(res2.statusCode).toBe(200);
     });
     it("should not get product by invalid id", async () => {
         const res = await request(app).get("/api/v1/products/invalid");
@@ -57,7 +71,7 @@ describe("Products", () => {
             priceCents: 100,
             description: "Product 1 description",
             stock: 10,
-        }).set("Authorization", `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNtdWwyZTdiYzAwMDF1anJna3ZvaG1uOGUiLCJlbWFpbCI6ImN1c3RvbWVyQG9yZGVyZmxvdy5kZXYiLCJuYW1lIjoiVGVzdCBDdXN0b21lciIsInJvbGUiOiJDVVNUT01FUiIsImlhdCI6MTc5MTE3Mzg4NCwiZXhwIjoxNzkxMTc0Nzg0fQ.b2034LBxEgAD056ldDHfFNVoPJLSBd_JYS75HjaG2Lw`);
+        }).set("Authorization", `Bearer ${customerAccessToken}`);
         expect(res.statusCode).toBe(403);
     });
 })

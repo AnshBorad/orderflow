@@ -30,7 +30,7 @@ const getAllProductsService = async (input: GetAllInput) => {
 
     return {
         data: products,
-        meta: { page, limit, total, totalPage: Math.ceil(total / limit) }
+        meta: { page, limit, total, totalPages: Math.ceil(total / limit) }
     };
 }
 

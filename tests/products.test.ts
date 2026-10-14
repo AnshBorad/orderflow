@@ -54,6 +54,7 @@ describe("Products", () => {
             description: "Product 1 description",
             stock: 10,
         }).set("Authorization", `Bearer ${accessToken}`);
+        productId.push(res.body.data.id);
         expect(res.statusCode).toBe(201);
     });
     it("should not create product without access token", async () => {

@@ -46,7 +46,7 @@ model Product {
   id          String      @id @default(cuid())
   name        String
   description String
-  priceCents  Int         // money ALWAYS as integer paise — never floats
+  priceCents  Int // money ALWAYS as integer paise — never floats
   stock       Int
   version     Int         @default(0) // optimistic locking: two buyers, one winner
   orderItems  OrderItem[]
@@ -57,29 +57,29 @@ model Product {
 }
 
 model Order {
-  id              String      @id @default(cuid())
-  userId          String
-  user            User        @relation(fields: [userId], references: [id])
-  status          OrderStatus @default(PENDING_PAYMENT)
-  totalCents      Int
-  idempotencyKey  String      @unique // double-click "Pay" => ONE order
-  items           OrderItem[]
-  payment         Payment?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id             String      @id @default(cuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id])
+  status         OrderStatus @default(PENDING_PAYMENT)
+  totalCents     Int
+  idempotencyKey String      @unique // double-click "Pay" => ONE order
+  items          OrderItem[]
+  payment        Payment?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
   @@index([userId, createdAt])
   @@map("orders")
 }
 
 model OrderItem {
-  id            String  @id @default(cuid())
-  orderId       String
-  order         Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId     String
-  product       Product @relation(fields: [productId], references: [id])
-  quantity      Int
-  unitPriceCents Int   // snapshot of price at purchase time
+  id             String  @id @default(cuid())
+  orderId        String
+  order          Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product @relation(fields: [productId], references: [id])
+  quantity       Int
+  unitPriceCents Int // snapshot of price at purchase time
 
   @@unique([orderId, productId])
   @@map("order_items")
@@ -90,7 +90,8 @@ model Payment {
   orderId           String        @unique
   order             Order         @relation(fields: [orderId], references: [id])
   provider          String        @default("razorpay")
-  providerPaymentId String        @unique
+  providerPaymentId String?       @unique // ← add the ? — it's optional until the webhook arrives
+  providerOrderId   String        @unique // razorpay's order_xxx (from Piece 1)
   status            PaymentStatus @default(CREATED)
   amountCents       Int
   createdAt         DateTime      @default(now())
@@ -103,7 +104,7 @@ model Payment {
 // worker relays to BullMQ — no "DB committed but queue lost it" bug
 model OutboxEvent {
   id          String    @id @default(cuid())
-  type        String    // e.g. "order.paid", "email.welcome"
+  type        String // e.g. "order.paid", "email.welcome"
   payload     Json
   processedAt DateTime?
   createdAt   DateTime  @default(now())

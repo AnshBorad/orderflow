@@ -11,6 +11,8 @@ const envSchema = z.object({
     JWT_REFRESH_SECRET: z.string().min(10),
     ACCESS_TOKEN_EXPIRY: z.string().default('15m'),   // "15m" = 15 minutes
     REFRESH_TOKEN_EXPIRY: z.string().default('7d'),   // "7d" = 7 days
+    RAZORPAY_KEY_ID: z.string().min(10),
+    RAZORPAY_KEY_SECRET: z.string().min(10),
 });
 
 const parsed = envSchema.safeParse(process.env);

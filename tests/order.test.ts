@@ -35,9 +35,19 @@ describe("Orders", () => {
 
 
     afterAll(async () => {
-        await prisma.orderItem.deleteMany({ where: { id: { in: orderItemId } } });
-        await prisma.order.deleteMany({ where: { id: { in: orderId } } });
-        await prisma.product.delete({ where: { id: productId } });
+        const orders = await prisma.order.findMany({
+            where: { items: { some: { productId } } },
+            select: { id: true },
+        });
+
+        await prisma.orderItem.deleteMany({
+            where: { order: { id: { in: orders.map(o => o.id) } } },
+        });
+        await prisma.order.deleteMany({
+            where: { id: { in: orders.map(o => o.id) } },
+        });
+
+        await prisma.product.deleteMany({ where: { id: productId } });
         await prisma.$disconnect();
         await redis.quit();
     });
@@ -88,7 +98,11 @@ describe("Orders", () => {
 
         orderItemId.push(buyer1Res.statusCode === 201 ? buyer1Res.body.data.items[0].id : buyer2Res.body.data.items[0].id);
 
-        expect(buyer1Res.statusCode === 201 ? buyer1Res.statusCode : buyer2Res.statusCode).toBe(201);
+        const statuses = [buyer1Res.statusCode, buyer2Res.statusCode].sort((a, b) => a - b);
+        expect(statuses).toEqual([201, 409]);
+        const product = await prisma.product.findUnique({ where: { id: productId } });
+        expect(product?.stock).toBe(0);
+        expect(product?.version).toBe(2);
     });
 
     it("should get all my orders", async () => {

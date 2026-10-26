@@ -12,10 +12,12 @@ import { errorHandler } from './shared/errorHandler.js';
 import { productRouter } from './modules/products/router.js';
 import { ordersRouter } from './modules/orders/router.js';
 import { paymentsRouter } from './modules/payments/router.js';
+import { webhookController } from "./modules/payments/controller.js";
 
 dotenv.config();
 
 const app = express();
+app.post("/api/v1/payments/webhook", express.raw({ type: "application/json" }), webhookController);
 
 app.set('trust proxy', 1);
 app.use(cors({ origin: true, credentials: true }));

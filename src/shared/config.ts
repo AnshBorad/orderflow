@@ -13,6 +13,7 @@ const envSchema = z.object({
     REFRESH_TOKEN_EXPIRY: z.string().default('7d'),   // "7d" = 7 days
     RAZORPAY_KEY_ID: z.string().min(10),
     RAZORPAY_KEY_SECRET: z.string().min(10),
+    RAZORPAY_WEBHOOK_SECRET: z.string().min(10),
 });
 
 const parsed = envSchema.safeParse(process.env);

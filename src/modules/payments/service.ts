@@ -16,7 +16,7 @@ async function createPaymentService(userId: string, orderId: string,) {
         }
     });
 
-    if (!order || order.userId !== userId) throw new ApiError(404, "Order not found");
+    if (!order || order.userId !== userId) throw new ApiError(400, "Invalid request");
     if (order.payment) throw new ApiError(409, "Payment already initiated");
     if (order.status !== "PENDING_PAYMENT") throw new ApiError(409, `Order is ${order.status}, not payable`);
             

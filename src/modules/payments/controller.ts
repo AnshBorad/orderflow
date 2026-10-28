@@ -14,7 +14,7 @@ const createPaymentController = asyncHandler(async (req, res) => {
     if (!req.user) throw new ApiError(401, "Unauthorized");
     const input = z.object({ orderId: z.string().min(1) }).parse(req.body);
     const result = await createPaymentService(req.user.id, input.orderId);
-    res.status(201).json(new ApiResponse(201, result, "Payment initiated"));
+    res.status(200).json(new ApiResponse(200, result, "Payment initiated"));
 });
 const verifySignature = (rawBody: Buffer, received: string | undefined): boolean => {
     if (!received) return false;
